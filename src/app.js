@@ -13,15 +13,43 @@ dotenv.config();
 
 app.use(express.json());
 
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "https://listify-iota.vercel.app",
+];
+
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? ["https://listify-iota.vercel.app"]
-        : ["http://localhost:3000", "http://localhost:5173"],
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+
+      console.log("CORS request from origin:", origin);
+
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        console.log("CORS blocked origin:", origin);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// CORS error handler
+app.use((err, req, res, next) => {
+  if (err.message === "Not allowed by CORS") {
+    return res.status(403).json({
+      success: false,
+      message: "CORS error: Origin not allowed",
+      origin: req.headers.origin,
+    });
+  }
+  next(err);
+});
 
 app.use(limiter);
 
@@ -38,6 +66,7 @@ app.use("/api", apiRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log("Allowed CORS origins:", allowedOrigins);
 
   try {
     validateEnv();
