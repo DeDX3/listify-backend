@@ -77,7 +77,6 @@ export const getUserPlaylists = async (req, res) => {
 
     const query = { userId: userId };
 
-    // Add search functionality
     if (search) {
       query.name = { $regex: search, $options: "i" };
     }
@@ -155,8 +154,6 @@ export const updatePlaylist = async (req, res) => {
     const { id: playlistId } = req.params;
     const { name, description } = req.body;
     const userId = req.user.userId;
-
-    console.log({ name, description, playlistId, userId });
 
     // Find playlist and ensure user owns it
     const playlist = await Playlist.findOne({
@@ -243,7 +240,7 @@ export const deletePlaylist = async (req, res) => {
 export const addSongToPlaylist = async (req, res) => {
   try {
     const { id: playlistId } = req.params;
-    const songData = req.body; // Single song object, not wrapped in songs array
+    const songData = req.body;
     const userId = req.user.userId;
 
     if (!songData || typeof songData !== "object") {
@@ -278,7 +275,6 @@ export const addSongToPlaylist = async (req, res) => {
       });
     }
 
-    // Check if song exists by spotifyId (if provided) or by title + artists combination
     let existingSong = null;
 
     if (songData.spotifyId) {
@@ -286,7 +282,6 @@ export const addSongToPlaylist = async (req, res) => {
     }
 
     if (!existingSong) {
-      // Try to find by title and artists combination
       existingSong = await Song.findOne({
         title: songData.title,
         artists: { $all: songData.artists },
@@ -296,10 +291,8 @@ export const addSongToPlaylist = async (req, res) => {
     let songIdToAdd;
 
     if (existingSong) {
-      // Song exists, use its ID
       songIdToAdd = existingSong._id;
     } else {
-      // Create new song
       const newSong = new Song({
         title: songData.title,
         artists: songData.artists,

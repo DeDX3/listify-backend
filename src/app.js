@@ -5,11 +5,11 @@ import { connectDB, validateEnv } from "./config/index.js";
 import { limiter } from "./middleware/rateLimiter.js";
 import cors from "cors";
 
+dotenv.config();
+
 const PORT = process.env.PORT || 3000;
 
 const app = express();
-
-dotenv.config();
 
 app.use(express.json());
 
@@ -23,8 +23,6 @@ app.use(
   cors({
     origin: function (origin, callback) {
       if (!origin) return callback(null, true);
-
-      console.log("CORS request from origin:", origin);
 
       if (allowedOrigins.indexOf(origin) !== -1) {
         callback(null, true);
