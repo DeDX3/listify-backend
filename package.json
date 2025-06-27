@@ -2,10 +2,12 @@
   "name": "listify-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/app.js",
   "type": "module",
   "scripts": {
+    "start": "node src/app.js",
     "dev": "nodemon src/app.js",
+    "build": "npm install",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
