@@ -5,22 +5,19 @@ import { connectDB, validateEnv } from "./config/index.js";
 import { limiter } from "./middleware/rateLimiter.js";
 import cors from "cors";
 
+const PORT = process.env.PORT || 3000;
+
 const app = express();
 
 dotenv.config();
 
-validateEnv();
-
-connectDB();
-
 app.use(express.json());
 
-// CORS configuration
 app.use(
   cors({
     origin:
       process.env.NODE_ENV === "production"
-        ? ["https://listify-iota.vercel.app/"]
+        ? ["https://listify-iota.vercel.app"]
         : ["http://localhost:3000", "http://localhost:5173"],
     credentials: true,
   })
@@ -39,6 +36,14 @@ app.get("/health", (req, res) => {
 
 app.use("/api", apiRouter);
 
-const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  try {
+    validateEnv();
+    connectDB();
+    console.log("Environment validated and database connected");
+  } catch (error) {
+    console.error("Error during startup:", error);
+  }
+});
